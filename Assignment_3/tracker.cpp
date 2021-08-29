@@ -70,6 +70,7 @@ int rgstr(int sock) //REGISTRATION OF NEW USER
     cout << "DETAILS OF NEW USER : ";
     read(sock, details, 30);
     string str = (string)details;
+    cout << str << endl;
     map<string, string>::iterator it;
     for (it = db.begin(); it != db.end(); it++)
     {
