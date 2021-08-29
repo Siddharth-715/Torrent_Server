@@ -69,6 +69,17 @@ int rgstr(int sock) //REGISTRATION OF NEW USER
     cout << "REGISTERING NEW USER\n";
     cout << "DETAILS OF NEW USER : ";
     read(sock, details, 30);
+    string str = (string)details;
+    map<string, string>::iterator it;
+    for (it = db.begin(); it != db.end(); it++)
+    {
+        if (it->first.compare(split(str)) == 0)
+        {
+            cout << "USERNAME ALREADY EXITST!!";
+            fclose(file);
+            return 0;
+        }
+    }
     cout << details;
     if (file)
     {
