@@ -17,6 +17,7 @@ using namespace std;
 int k = 0; //CLIENT COUNTER {BROKEN}
 
 map<string, string> db; // DATABSE MAP: FOR LOADING DATA FROM SAVED FILE
+map<string, string> online;
 
 void error(const char *msg)
 {
@@ -57,40 +58,44 @@ void loader() // LOADS THE DATA FROM FILE TO DATABASE MAP ON EVERY RUN
             usr = split(str);
             pswd = split2(str);
             db[usr] = pswd;
+            online[usr] = "offline";
         }
         file.close();
     }
 }
 
-int rgstr(int sock) //REGISTRATION OF NEW USER
+int rgstr(int sock, string &name) //REGISTRATION OF NEW USER
 {
     FILE *file = fopen("data.txt", "a");
     char details[30];
     cout << "REGISTERING NEW USER\n";
-    cout << "DETAILS OF NEW USER : ";
     read(sock, details, 30);
     string str = (string)details;
-    cout << str << endl;
     map<string, string>::iterator it;
     for (it = db.begin(); it != db.end(); it++)
     {
         if (it->first.compare(split(str)) == 0)
         {
-            cout << "USERNAME ALREADY EXITST!!";
+            cout << "REGISTRATION FAILED" << endl;
             fclose(file);
+            write(sock, "0", 2);
             return 0;
         }
     }
+
+    name = split(str);
+    online[name] = "online";
+    cout << "DETAILS OF NEW USER : ";
     cout << details;
     if (file)
     {
         fputs(details, file);
     }
     fclose(file);
-    return 0;
+    return 1;
 }
 
-int login(int sock) //LOGIN OF EXISTING USER
+int login(int sock, string &name) //LOGIN OF EXISTING USER
 {
     char details[30];
     memset(details, 0, 30);
@@ -108,11 +113,12 @@ int login(int sock) //LOGIN OF EXISTING USER
             str = it->first;
             write(sock, str.c_str(), 20);
             cout << str << " LOGGED IN!\n";
-            return 0;
+            name = str;
+            online[str] = "online";
+            return 1;
         }
     }
-    char f[] = "0";
-    write(sock, f, strlen(f));
+    write(sock, "0", 2);
     cout << "LOGIN FAILED!!!\n";
     return 0;
 }
@@ -125,38 +131,63 @@ struct arg
 
 void *dostuff(void *cli_info) // MESSAGE MANAGER AND FUNCTION CALLS
 {
-    int n;
+    int n, i=1;
     char buffer[256];
     long csock = (long)((struct arg *)cli_info)->sock;
     string cli_port = ((struct arg *)cli_info)->port;
+    int status = 0;
+    string name;
+    cout << "A USER CONNECTED VIA PORT: " << cli_port << endl;
 
     while (true)
     {
+        label: 
         bzero(buffer, 256);
         n = read(csock, buffer, 255);
         if (n <= 0)
         {
-            error("Client Disconnecting...");
+            std::cout << name << " IS DISCONNECTING..." << std::endl;
+            online[name] = "offline";
             break;
         }
 
         if (buffer[0] == '1') //REGISTRATION CALL
         {
-            rgstr(csock);
+            status = rgstr(csock, name);
             continue;
         }
 
         if (buffer[0] == '2') //LOGIN CALL
         {
-            login(csock);
+            status = login(csock, name);
+            goto label;
+        }
+
+        if (buffer[0] == '3') //ONLINE STATUSES
+        {
+            write(csock, "status", 18);
             continue;
         }
 
-        cout << cli_port << "<> " << buffer << endl;
-        //printf("%s<> %s\n",cli_port, buffer);    //PRINTING CLIENT MESSAGES
-        n = write(csock, "<>recived<>", 18);
-        if (n < 0)
-            error("ERROR writing to socket");
+        if(i < 2)
+        {
+            i++;
+            goto label;
+        }
+
+        if (status == 1)
+        {
+            cout << name << "<> " << buffer << endl;
+            n = write(csock, "<>recived<>", 18);
+            if (n < 0)
+                error("ERROR writing to socket");
+        }
+
+        if (status == 0)
+        {
+            write(csock, "YOU ARE NOT LOGGED IN!", 35);
+            continue;
+        }
     }
 
     close(csock); //CLOSING THREAD FOR INDIVIDUAL THREAD
@@ -179,7 +210,7 @@ int main() //MAIN()
     if (sockfd < 0)
         error("ERROR opening socket");
     bzero((char *)&serv_addr, sizeof(serv_addr));
-    portno = 8000;
+    portno = 9000;
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = INADDR_ANY;
     serv_addr.sin_port = htons(portno);
