@@ -165,8 +165,16 @@ void *dostuff(void *cli_info) // MESSAGE MANAGER AND FUNCTION CALLS
 
         if (buffer[0] == '3') //ONLINE STATUSES
         {
-            write(csock, "status", 18);
-            continue;
+            map<string, string>::iterator it;
+            for (it = online.begin(); it != online.end(); it++)
+            {
+                if (it->second.compare("online") == 0)
+                {
+                    write(csock, (it->first).c_str(), 30);
+                }
+            }
+            write(csock, "|", 2);
+            goto label;
         }
 
         if (status == 1)
