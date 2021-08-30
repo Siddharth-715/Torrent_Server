@@ -82,7 +82,7 @@ int rgstr(int sock, string &name) //REGISTRATION OF NEW USER
             return 0;
         }
     }
-
+    write(sock, "1", 2);
     name = split(str);
     online[name] = "online";
     cout << "DETAILS OF NEW USER : ";
@@ -154,7 +154,7 @@ void *dostuff(void *cli_info) // MESSAGE MANAGER AND FUNCTION CALLS
         if (buffer[0] == '1') //REGISTRATION CALL
         {
             status = rgstr(csock, name);
-            continue;
+            goto label;
         }
 
         if (buffer[0] == '2') //LOGIN CALL
