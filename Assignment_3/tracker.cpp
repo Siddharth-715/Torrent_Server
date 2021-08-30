@@ -97,11 +97,11 @@ int rgstr(int sock, string &name) //REGISTRATION OF NEW USER
 
 int login(int sock, string &name) //LOGIN OF EXISTING USER
 {
-    char details[30];
+    char details[50];
     memset(details, 0, 30);
     string str;
     cout << "A USER IS LOGGING IN....\n";
-    read(sock, details, 20);
+    read(sock, details, 30);
     str = (string)details;
     str = str.substr(0, str.length() - 1); //HAVE TO CHANGE LENGTH AS READ() FUCKS UP THE LENGTH (-_-)!
     map<string, string>::iterator it;
@@ -111,7 +111,7 @@ int login(int sock, string &name) //LOGIN OF EXISTING USER
         {
             str.clear();
             str = it->first;
-            write(sock, str.c_str(), 20);
+            write(sock, str.c_str(), 30);
             cout << str << " LOGGED IN!\n";
             name = str;
             online[str] = "online";
@@ -136,7 +136,7 @@ void *dostuff(void *cli_info) // MESSAGE MANAGER AND FUNCTION CALLS
     long csock = (long)((struct arg *)cli_info)->sock;
     string cli_port = ((struct arg *)cli_info)->port;
     int status = 0;
-    string name;
+    string name = "USER";
     cout << "A USER CONNECTED VIA PORT: " << cli_port << endl;
 
     while (true)
@@ -169,12 +169,6 @@ void *dostuff(void *cli_info) // MESSAGE MANAGER AND FUNCTION CALLS
             continue;
         }
 
-        if(i < 2)
-        {
-            i++;
-            goto label;
-        }
-
         if (status == 1)
         {
             cout << name << "<> " << buffer << endl;
@@ -186,7 +180,7 @@ void *dostuff(void *cli_info) // MESSAGE MANAGER AND FUNCTION CALLS
         if (status == 0)
         {
             write(csock, "YOU ARE NOT LOGGED IN!", 35);
-            continue;
+            goto label;
         }
     }
 
