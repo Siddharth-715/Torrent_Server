@@ -1,4 +1,4 @@
-/********************************SERVER*************************************/
+/********************************TRACKER*************************************/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -198,6 +198,7 @@ void *dostuff(void *cli_info) // MESSAGE MANAGER AND FUNCTION CALLS
 
 int main() //MAIN()
 {
+    cout << "***TRACKER IS LISTENING ON PORT 9000***" << endl;
     int sockfd, newsockfd, portno, pid, opt;
     char hbuf[NI_MAXHOST], sbuf[NI_MAXSERV];
     socklen_t clilen;
