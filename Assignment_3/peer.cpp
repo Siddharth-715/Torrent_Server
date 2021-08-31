@@ -94,8 +94,8 @@ int tracker() //MAIN()
         error("ERROR connecting");
 
    
-    while (true)
-    {
+    // while (true)
+    // {
     label:
         printf("TRACKER<> ");
         bzero(buffer, 256);
@@ -113,14 +113,14 @@ int tracker() //MAIN()
         {
             std::cout << "EXITING...." << std::endl;
             close(tfd);
-            break;
+            return 0;
         }
 
         if (buffer[0] == '1') //REGISTRATION CALL
         {
             n = write(tfd, buffer, strlen(buffer));
             rgstr(tfd);
-            continue;
+            goto label;
         }
 
         if (buffer[0] == '2') //LOGIN CALL
@@ -136,7 +136,6 @@ int tracker() //MAIN()
 
         if (buffer[0] == '3') //ONLINE STATUS
         {
-            // status(tfd);
             cout << "******ONLINE-PEERS******" << endl;
             while (true)
             {
@@ -156,7 +155,7 @@ int tracker() //MAIN()
             error("ERROR reading from socket");
         printf("%s", buffer);
         cout << std::endl;
-    }
+    //}
 
     return 0;
 }
