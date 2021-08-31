@@ -1,0 +1,3 @@
+g++ -o t tracker.cpp -lpthread
+g++ -o p peer.cpp -lpthread
+
