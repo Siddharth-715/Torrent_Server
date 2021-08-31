@@ -134,8 +134,8 @@ int tracker() //MAIN()
     if (connect(tfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
         error("ERROR connecting");
 
-    while (true)
-    {
+    //while (true)
+    //{
     label:
         printf("TRACKER<> ");
         bzero(buffer, 256);
@@ -196,13 +196,21 @@ int tracker() //MAIN()
             goto label;
         }
 
-        bzero(buffer, 256);
-        n = read(tfd, buffer, 200);
-        if (n < 0)
-            error("ERROR reading from socket");
-        printf("%s", buffer);
-        cout << std::endl;
-    }
+        if (myname.compare("#") != 0 && myport != 0)
+        {
+            bzero(buffer, 256);
+            n = read(tfd, buffer, 200);
+            if (n < 0)
+                error("ERROR reading from socket");
+            printf("%s", buffer);
+            cout << std::endl;
+        }
+        else
+        {
+            cout << "YOU ARE NOT LOGGED IN" << endl;
+            goto label;
+        }
+    //}
     return 0;
 }
 
@@ -274,12 +282,6 @@ int peers(string name, int port)
             error("ERROR on accept");
         client.sock = newsockfd;
         client.peer = name;
-        // if (getnameinfo((struct sockaddr *)&cli_addr, clilen, hbuf, sizeof(hbuf), sbuf, sizeof(sbuf), 0) != 0)
-        //     cout << "errrr" << endl; //TO GET PORT NO. OF CLIENT
-        // else
-        // {
-        //     client.port = (string)sbuf;
-        // }
         pthread_create(&threads[i], NULL, dostuff, (void *)&client); //THREADING
     }
 
@@ -289,6 +291,8 @@ int peers(string name, int port)
     close(sockfd); //CLOSING SOCKET FOR MAIN THREAD ONLY
     return 0;
 }
+
+
 int main()
 {
     loader();

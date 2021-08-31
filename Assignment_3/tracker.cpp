@@ -179,7 +179,7 @@ void *dostuff(void *cli_info) // MESSAGE MANAGER AND FUNCTION CALLS
 
         if (status == 1)
         {
-            cout << name << "<> " << buffer << endl;
+            cout << name << "<> " << buffer;
             n = write(csock, "<>recived<>", 18);
             if (n < 0)
                 error("ERROR writing to socket");
@@ -187,7 +187,6 @@ void *dostuff(void *cli_info) // MESSAGE MANAGER AND FUNCTION CALLS
 
         if (status == 0)
         {
-            write(csock, "YOU ARE NOT LOGGED IN!", 35);
             goto label;
         }
     }
