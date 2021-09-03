@@ -11,7 +11,9 @@
 #include <netdb.h>
 #include <fstream>
 #include <iostream>
+#include <math.h>
 #include <map>
+#include "sha256.h"
 using namespace std;
 
 int tfd;
@@ -197,6 +199,23 @@ int login(int sock) //LOGIN OF  USER
     return 0;
 }
 
+int upload(int csock)
+{
+    ifstream file;
+    string str, temp, fname, sha;
+    cout << "ENTER NAME OF THE FILE YOU WISH TO UPLOAD: \n";
+    cin >> fname;
+    file.open(fname, ios::ate);
+    float size = file.tellg();
+    float bnum = ceil(size / 10240);
+    char bbuff[10240];
+    for (int i = 0; i < size; i++)
+    {
+        
+    }
+        fclose(file);
+}
+
 int peerc()
 {
     int sockfd, n, p;
@@ -361,7 +380,14 @@ label:
             peerc();
             goto label;
         }
-        
+
+        if (buffer[0] == '4') //USER WANTS TO UPLOAD A FILE
+        {
+            n = write(tfd, buffer, strlen(buffer));
+            upload(tfd);
+            goto label;
+        }
+
         bzero(buffer, 256);
         n = read(tfd, buffer, 200);
         if (n < 0)
@@ -385,9 +411,9 @@ int main()
     cout << "<>ENTER 1 -> CREATE NEW ACCOUNT\n";
     cout << "<>ENTER 2 -> LOGIN IN SERVER\n";
     cout << "<>ENTER 3 -> SEE ONLINE PEERS\n";
+    cout << "<>ENTER 4 -> UPLOAD FILE/n";
     cout << "<>TO EXIT -> ENTER 'exit'\n";
     tracker();
-    cout << "tracker closed" << endl;
     shutdown(tfd, 2);
     return 0;
 }

@@ -12,6 +12,7 @@
 #include <fstream>
 #include <pthread.h>
 #include <map>
+#include "sha256.h"
 using namespace std;
 
 int k = 0; //CLIENT COUNTER {BROKEN}
