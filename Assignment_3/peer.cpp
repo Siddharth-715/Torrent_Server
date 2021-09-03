@@ -361,7 +361,7 @@ label:
             peerc();
             goto label;
         }
-        
+
         bzero(buffer, 256);
         n = read(tfd, buffer, 200);
         if (n < 0)
@@ -387,7 +387,6 @@ int main()
     cout << "<>ENTER 3 -> SEE ONLINE PEERS\n";
     cout << "<>TO EXIT -> ENTER 'exit'\n";
     tracker();
-    cout << "tracker closed" << endl;
     shutdown(tfd, 2);
     return 0;
 }
