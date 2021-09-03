@@ -195,7 +195,7 @@ void *dostuff(void *cli_info) // MESSAGE MANAGER AND FUNCTION CALLS
     pthread_exit(NULL);
 }
 
-int main() //MAIN()
+int main() //SERVER IS RUNNING
 {
     cout << "***TRACKER IS LISTENING ON PORT 9000***" << endl;
     int sockfd, newsockfd, portno, pid, opt;
