@@ -1,8 +1,0 @@
-hi miss electron anshika
-
-
-
-
-
-
-.
