@@ -12,7 +12,9 @@
 #include <fstream>
 #include <pthread.h>
 #include <map>
+#include <math.h>
 #include "sha256.h"
+#include <vector>
 using namespace std;
 
 int k = 0; //CLIENT COUNTER {BROKEN}
@@ -124,6 +126,17 @@ int login(int sock, string &name) //LOGIN OF EXISTING USER
     return 0;
 }
 
+int upload(int sock, string name)
+{
+    cout << name << " IS UPLOADING A FILE...." << endl;
+    char buffer[500];
+    memset(buffer, 0, 500);
+    read(sock, buffer, 490);
+    string fdetails(buffer);
+    cout << fdetails << endl;
+    return 0;
+}
+
 struct arg
 {
     int sock;
@@ -132,8 +145,8 @@ struct arg
 
 void *dostuff(void *cli_info) // MESSAGE MANAGER AND FUNCTION CALLS
 {
-    int n, i=1;
-    char buffer[256];
+    int n, i = 1;
+    char buffer[500];
     long csock = (long)((struct arg *)cli_info)->sock;
     string cli_port = ((struct arg *)cli_info)->port;
     int status = 0;
@@ -142,9 +155,9 @@ void *dostuff(void *cli_info) // MESSAGE MANAGER AND FUNCTION CALLS
 
     while (true)
     {
-        label: 
-        bzero(buffer, 256);
-        n = read(csock, buffer, 255);
+    label:
+        bzero(buffer, 500);
+        n = read(csock, buffer, 499);
         if (n <= 0)
         {
             std::cout << name << " IS DISCONNECTING..." << std::endl;
@@ -161,6 +174,12 @@ void *dostuff(void *cli_info) // MESSAGE MANAGER AND FUNCTION CALLS
         if (buffer[0] == '2') //LOGIN CALL
         {
             status = login(csock, name);
+            goto label;
+        }
+
+        if (buffer[0] == '4') //UPLOAD FILE DETAILS
+        {
+            upload(csock, name);
             goto label;
         }
 
