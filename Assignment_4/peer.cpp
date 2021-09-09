@@ -378,7 +378,7 @@ label2:
             if (buffer[0] == '|')
                 break;
             printf("%s", buffer);
-            cout << std::endl;
+            cout << endl;
         }
         goto label;
     }
@@ -405,7 +405,7 @@ label2:
         if (n < 0)
             error("ERROR reading from socket");
         printf("%s", buffer);
-        cout << std::endl;
+        cout << endl;
         goto label;
     }
     else
