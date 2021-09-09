@@ -1,2 +1,6 @@
 g++ -o t tracker.cpp -lpthread
 g++ -o p peer.cpp -lpthread
+fuser -k 9000/tcp
+fuser -k 9002/tcp
+fuser -k 9004/tcp
+fuser -k 9006/tcp
