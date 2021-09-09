@@ -14,7 +14,6 @@
 #include <map>
 #include <math.h>
 #include "sha256.h"
-#include <vector>
 using namespace std;
 
 int tfd;
@@ -122,7 +121,10 @@ int peers()
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = INADDR_ANY;
     serv_addr.sin_port = htons(myport);
-    
+    if (bind(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
+    {
+        error("ERROR on binding");
+    }
     listen(sockfd, 5);
     clilen = sizeof(cli_addr);
 
@@ -190,10 +192,7 @@ int login(int sock) //LOGIN OF  USER
     myport = atoi(db[myname].c_str());
     int pid = fork();
     if (pid == 0)
-        {
-            close(tfd);
-            peers();
-        }
+        peers();
 
     return 0;
 }
@@ -201,14 +200,14 @@ int login(int sock) //LOGIN OF  USER
 int upload(int csock)
 {
     ifstream file;
-    string str, temp, fname, sha;
+    string fname, sha;
     cout << "ENTER NAME OF THE FILE YOU WISH TO UPLOAD: \n";
     cin >> fname;
     file.open(fname, ios::ate);
     float size = file.tellg();
     float bnum = ceil(size / 10240);
     file.seekg(0);
-    char bbuff[10240];
+    char bbuff[10240] = {0};
     for (int i = 1; i <= bnum; i++)
     {
         if (i == bnum)
@@ -220,7 +219,7 @@ int upload(int csock)
         bzero(bbuff, 10240);
     }
     file.close();
-    cout << sha << endl;
+    std::cout << sha << std::endl;
     string fdetails;
     fdetails = fname + ':' + to_string(myport) + ':' + to_string((int)bnum) + ':' + to_string((int)size) + '|' + sha;
     write(csock, fdetails.c_str(), 490);
@@ -308,7 +307,7 @@ int tracker() //TO CONNECT PEER WITH TRACKER
     int portno, n, p;
     struct sockaddr_in serv_addr;
     struct hostent *server;
-    char buffer[500];
+    char buffer[256];
     char req[] = "exit";
     string info;
     portno = 9000;
@@ -330,10 +329,14 @@ int tracker() //TO CONNECT PEER WITH TRACKER
 
 label:
     printf("TRACKER<> ");
-    bzero(buffer, 500);
-    fgets(buffer, 500, stdin); //MESSAGE/QUERY FOR SERVER
+label2:
+    bzero(buffer, 256);
+    fgets(buffer, 250, stdin); //MESSAGE/QUERY FOR SERVER
     p = 0;
     info = (string)buffer;
+
+    if(buffer[0] == ' ' || buffer[0] == '\n')
+        goto label2;
 
     for (int i = 0; i < 4; i++) //FOR EXITING SERVER
     {
@@ -348,6 +351,10 @@ label:
         return 0;
     }
 
+    n = write(tfd, buffer, 255); //MESSAGE SENT TO SERVER
+    if (n < 0)
+        return 0;
+    
     if (buffer[0] == '1') //REGISTRATION CALL
     {
         n = write(tfd, buffer, strlen(buffer));
@@ -357,34 +364,28 @@ label:
 
     if (buffer[0] == '2') //LOGIN CALL
     {
-        n = write(tfd, buffer, strlen(buffer));
         login(tfd);
         goto label;
     }
-
-    if (buffer[0] == '4') //FILE DETAILS UPLOAD
-    {
-        n = write(tfd, buffer, strlen(buffer));
-        upload(tfd);
-        goto label;
-    }
-
-    n = write(tfd, buffer, 499); //MESSAGE SENT TO SERVER
-    if (n < 0)
-        return 0;
 
     if (buffer[0] == '3') //ONLINE STATUS
     {
         cout << "******ONLINE-PEERS******" << endl;
         while (true)
         {
-            bzero(buffer, 500);
+            bzero(buffer, 256);
             n = read(tfd, buffer, 30);
             if (buffer[0] == '|')
                 break;
             printf("%s", buffer);
             cout << std::endl;
         }
+        goto label;
+    }
+
+    if (buffer[0] == '4') //FILE DETAILS UPLOAD
+    {
+        upload(tfd);
         goto label;
     }
 
@@ -399,8 +400,8 @@ label:
             goto label;
         }
 
-        bzero(buffer, 500);
-        n = read(tfd, buffer, 500);
+        bzero(buffer, 256);
+        n = read(tfd, buffer, 200);
         if (n < 0)
             error("ERROR reading from socket");
         printf("%s", buffer);
@@ -422,6 +423,7 @@ int main()
     cout << "<>ENTER 1 -> CREATE NEW ACCOUNT\n";
     cout << "<>ENTER 2 -> LOGIN IN SERVER\n";
     cout << "<>ENTER 3 -> SEE ONLINE PEERS\n";
+    cout << "<>ENTER 4 -> UPLOAD A FILE'S DETAILS\n";
     cout << "<>TO EXIT -> ENTER 'exit'\n";
     tracker();
     shutdown(tfd, 2);

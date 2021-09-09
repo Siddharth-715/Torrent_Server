@@ -14,7 +14,6 @@
 #include <map>
 #include <math.h>
 #include "sha256.h"
-#include <vector>
 using namespace std;
 
 int k = 0; //CLIENT COUNTER {BROKEN}
@@ -131,9 +130,9 @@ int upload(int sock, string name)
     cout << name << " IS UPLOADING A FILE...." << endl;
     char buffer[500];
     memset(buffer, 0, 500);
-    read(sock, buffer, 490);
+    read(sock, buffer, 500);
     string fdetails(buffer);
-    cout << fdetails << endl;
+    std::cout << fdetails << std::endl;
     return 0;
 }
 
@@ -146,7 +145,7 @@ struct arg
 void *dostuff(void *cli_info) // MESSAGE MANAGER AND FUNCTION CALLS
 {
     int n, i = 1;
-    char buffer[500];
+    char buffer[256];
     long csock = (long)((struct arg *)cli_info)->sock;
     string cli_port = ((struct arg *)cli_info)->port;
     int status = 0;
@@ -156,8 +155,8 @@ void *dostuff(void *cli_info) // MESSAGE MANAGER AND FUNCTION CALLS
     while (true)
     {
     label:
-        bzero(buffer, 500);
-        n = read(csock, buffer, 499);
+        bzero(buffer, 256);
+        n = read(csock, buffer, 255);
         if (n <= 0)
         {
             std::cout << name << " IS DISCONNECTING..." << std::endl;
@@ -177,12 +176,6 @@ void *dostuff(void *cli_info) // MESSAGE MANAGER AND FUNCTION CALLS
             goto label;
         }
 
-        if (buffer[0] == '4') //UPLOAD FILE DETAILS
-        {
-            upload(csock, name);
-            goto label;
-        }
-
         if (buffer[0] == '3') //ONLINE STATUSES
         {
             map<string, string>::iterator it;
@@ -194,6 +187,12 @@ void *dostuff(void *cli_info) // MESSAGE MANAGER AND FUNCTION CALLS
                 }
             }
             write(csock, "|", 2);
+            goto label;
+        }
+
+        if (buffer[0] == '4') //UPLOAD FILE DETAILS
+        {
+            upload(csock, name);
             goto label;
         }
 
