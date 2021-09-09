@@ -377,8 +377,7 @@ label2:
             n = read(tfd, buffer, 30);
             if (buffer[0] == '|')
                 break;
-            printf("%s", buffer);
-            cout << endl;
+            printf("%s\n", buffer);
         }
         goto label;
     }
@@ -386,6 +385,24 @@ label2:
     if (buffer[0] == '4') //FILE DETAILS UPLOAD
     {
         upload(tfd);
+        goto label;
+    }
+
+    if (buffer[0] == '5') //FILE AVAILBILITY
+    {
+        string fname;
+        cout << "ENTER A FILE NAME TO CHECK ITS AVAILBILITY" << endl;
+        cin >> fname;
+        write(tfd, fname.c_str(), 30);
+        cout << "**PEERS WITH " << fname << "**" << endl;
+        while (true)
+        {
+            bzero(buffer, 256);
+            n = read(tfd, buffer, 30);
+            if (buffer[0] == '|')
+                break;
+            printf("%s\n", buffer);
+        }
         goto label;
     }
 

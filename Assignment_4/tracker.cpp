@@ -13,6 +13,7 @@
 #include <pthread.h>
 #include <map>
 #include <math.h>
+#include <vector>
 #include "sha256.h"
 using namespace std;
 
@@ -20,6 +21,7 @@ int k = 0; //CLIENT COUNTER {BROKEN}
 
 map<string, string> db; // DATABSE MAP: FOR LOADING DATA FROM SAVED FILE
 map<string, string> online;
+map<string, vector<string>> files;
 
 void error(const char *msg)
 {
@@ -131,8 +133,10 @@ int upload(int sock, string name)
     char buffer[500];
     memset(buffer, 0, 500);
     read(sock, buffer, 500);
-    string fdetails(buffer);
+    string fdetails(buffer), fname;
     std::cout << fdetails << std::endl;
+    string temp = split(fdetails);
+    files[temp].push_back(name);
     return 0;
 }
 
@@ -193,6 +197,25 @@ void *dostuff(void *cli_info) // MESSAGE MANAGER AND FUNCTION CALLS
         if (buffer[0] == '4') //UPLOAD FILE DETAILS
         {
             upload(csock, name);
+            goto label;
+        }
+
+        if (buffer[0] == '5') //FILE AVAILBILITY
+        {
+            char fname[40] = {0};
+            read(csock, fname, 30);
+            if(files.count((string)fname) > 0)
+            {
+                for (auto it : files[(string)fname])
+                {
+                    write(csock, (it).c_str(), 30);
+                }
+            }
+            else
+            {
+                write(csock, "NO PEER HAS THIS FILE", 30);
+            }
+            write(csock, "|", 2);
             goto label;
         }
 
