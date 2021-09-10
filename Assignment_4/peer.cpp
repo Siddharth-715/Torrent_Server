@@ -82,9 +82,9 @@ void *dostuff(void *cli_info) // MESSAGE MANAGER AND FUNCTION CALLS
     string cli_name = ((struct arg *)cli_info)->peer;
     bzero(buffer, 256);
     read(csock, buffer, 10);
-    pname = (string)buffer;
-    pport = atoi(db[pname].c_str());
-    cout << "CONNECTED TO " << pname << endl;
+    string pn = (string)buffer;
+    int pp = atoi(db[pn].c_str());
+    cout << "CONNECTED TO " << pn << endl;
 
     while (true)
     {
@@ -95,7 +95,7 @@ void *dostuff(void *cli_info) // MESSAGE MANAGER AND FUNCTION CALLS
             error("Client Disconnecting...");
             break;
         }
-        cout << pname << "<> " << buffer;
+        cout << pn << "<> " << buffer;
         n = write(csock, "<>recived<>", 18);
         if (n < 0)
             error("ERROR writing to socket");
@@ -111,6 +111,7 @@ int peers()
     socklen_t clilen;
     pthread_t threads[5];
     struct arg client;
+    char peername[15] = {0};
     loader();
     struct sockaddr_in serv_addr, cli_addr;
     int n;
@@ -134,9 +135,9 @@ int peers()
         newsockfd = accept(sockfd, (struct sockaddr *)&cli_addr, &clilen);
         if (newsockfd < 0)
             error("ERROR on accept");
+        //read(sockfd, peername, 10);
         client.sock = newsockfd;
-        client.peer = myname;
-        cout << "SEEMS LIKE SOMEONE CONNECTED TO YOU! " << endl;
+        client.peer = (string)peername;
         pthread_create(&threads[i], NULL, dostuff, (void *)&client); //THREADING
     }
 
@@ -441,6 +442,7 @@ int main()
     cout << "<>ENTER 2 -> LOGIN IN SERVER\n";
     cout << "<>ENTER 3 -> SEE ONLINE PEERS\n";
     cout << "<>ENTER 4 -> UPLOAD A FILE'S DETAILS\n";
+    cout << "<>ENTER 5 -> CHECK A FILE'S AVAILBILITY\n";
     cout << "<>TO EXIT -> ENTER 'exit'\n";
     tracker();
     shutdown(tfd, 2);
